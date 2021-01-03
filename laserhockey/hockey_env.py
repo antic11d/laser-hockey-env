@@ -8,6 +8,8 @@ from Box2D.b2 import (edgeShape, circleShape, fixtureDef, polygonShape, revolute
 import gym
 from gym import spaces
 from gym.utils import seeding, EzPickle
+import colorama
+from colorama import Fore, Style
 
 # import pyglet
 # from pyglet import gl
@@ -47,22 +49,24 @@ class ContactDetector(contactListener):
     def BeginContact(self, contact):
         if self.env.goal_player_2 == contact.fixtureA.body or self.env.goal_player_2 == contact.fixtureB.body:
             if self.env.puck == contact.fixtureA.body or self.env.puck == contact.fixtureB.body:
-                print('Player 1 scored')
+                if not self.env.quiet:
+                    print(f'{Fore.GREEN}Player 1{Style.RESET_ALL}', end="")
                 self.env.done = True
                 self.env.winner = 1
         if self.env.goal_player_1 == contact.fixtureA.body or self.env.goal_player_1 == contact.fixtureB.body:
             if self.env.puck == contact.fixtureA.body or self.env.puck == contact.fixtureB.body:
-                print('Player 2 scored')
+                if not self.env.quiet:
+                    print(f'{Fore.RED}Player 2{Style.RESET_ALL}', end="")
                 self.env.done = True
                 self.env.winner = -1
         if (contact.fixtureA.body == self.env.player1 or contact.fixtureB.body == self.env.player1) \
-            and (contact.fixtureA.body == self.env.puck or contact.fixtureB.body == self.env.puck):
+                and (contact.fixtureA.body == self.env.puck or contact.fixtureB.body == self.env.puck):
             if self.env.keep_mode and self.env.puck.linearVelocity[0] < 0.1:
                 if self.env.player1_has_puck == 0:
                     self.env.player1_has_puck = MAX_TIME_KEEP_PUCK
 
         if (contact.fixtureA.body == self.env.player2 or contact.fixtureB.body == self.env.player2) \
-            and (contact.fixtureA.body == self.env.puck or contact.fixtureB.body == self.env.puck):
+                and (contact.fixtureA.body == self.env.puck or contact.fixtureB.body == self.env.puck):
             if self.env.keep_mode and self.env.puck.linearVelocity[0] > -0.1:
                 if self.env.player2_has_puck == 0:
                     self.env.player2_has_puck = MAX_TIME_KEEP_PUCK
@@ -82,7 +86,7 @@ class HockeyEnv(gym.Env, EzPickle):
     TRAIN_SHOOTING = 1
     TRAIN_DEFENSE = 2
 
-    def __init__(self, keep_mode=True, mode=NORMAL):
+    def __init__(self, keep_mode=True, mode=NORMAL, quiet=False):
         """ mode: is the game mode: NORMAL, TRAIN_SHOOTING, TRAIN_DEFENSE,
         keep_mode: whether the puck gets catched by
         it can be changed later using the reset function
@@ -92,6 +96,7 @@ class HockeyEnv(gym.Env, EzPickle):
         self.viewer = None
         self.mode = mode
         self.keep_mode = keep_mode
+        self.quiet = quiet
         self.player1_has_puck = 0
         self.player2_has_puck = 0
 
@@ -109,7 +114,7 @@ class HockeyEnv(gym.Env, EzPickle):
 
         self.timeStep = 1.0 / FPS
         self.time = 0
-        self.max_timesteps = None # see reset
+        self.max_timesteps = None  # see reset
 
         self.closest_to_goal_dist = 1000
 
@@ -149,7 +154,8 @@ class HockeyEnv(gym.Env, EzPickle):
         return [seed]
 
     def _destroy(self):
-        if self.player1 is None: return
+        if self.player1 is None:
+            return
         self.world.contactListener = None
         self.world.DestroyBody(self.player1)
         self.player1 = None
@@ -287,7 +293,6 @@ class HockeyEnv(gym.Env, EzPickle):
             objs[-1].color1 = (1, 1, 1)
             objs[-1].color2 = (1, 1, 1)
 
-
             return objs
 
         self.world_objects = []
@@ -298,7 +303,7 @@ class HockeyEnv(gym.Env, EzPickle):
         self.world_objects.append(_create_wall((W / 2, H - .5), poly))
         self.world_objects.append(_create_wall((W / 2, .5), poly))
 
-        poly = [(-10, (H-1)/2*SCALE - GOAL_SIZE), (10, (H-1)/2*SCALE - GOAL_SIZE-7), (10, -5), (-10, -5)]
+        poly = [(-10, (H - 1) / 2 * SCALE - GOAL_SIZE), (10, (H - 1) / 2 * SCALE - GOAL_SIZE - 7), (10, -5), (-10, -5)]
         self.world_objects.append(_create_wall((W / 2 - 245 / SCALE, H - .5), [(x, -y) for x, y in poly]))
         self.world_objects.append(_create_wall((W / 2 - 245 / SCALE, .5), poly))
 
@@ -353,7 +358,6 @@ class HockeyEnv(gym.Env, EzPickle):
             self.max_timesteps = 80
         self.closest_to_goal_dist = 1000
 
-
         W = VIEWPORT_W / SCALE
         H = VIEWPORT_H / SCALE
 
@@ -364,15 +368,14 @@ class HockeyEnv(gym.Env, EzPickle):
         self.goal_player_1 = self._create_goal((W / 2 - 245 / SCALE - 10 / SCALE, H / 2), poly)
         self.goal_player_2 = self._create_goal((W / 2 + 245 / SCALE + 10 / SCALE, H / 2), poly)
 
-
         # Create players
-        red = (235./255., 98./255., 53./255.)
+        red = (235. / 255., 98. / 255., 53. / 255.)
         self.player1 = self._create_player(
             (W / 5, H / 2),
             red,
             False
         )
-        blue = (93./255, 158./255., 199./255.)
+        blue = (93. / 255, 158. / 255., 199. / 255.)
         if self.mode != self.NORMAL:
             self.player2 = self._create_player(
                 (4 * W / 5 + self.r_uniform(-W / 3, W / 6), H / 2 + self.r_uniform(-H / 4, H / 4)),
@@ -396,14 +399,13 @@ class HockeyEnv(gym.Env, EzPickle):
             self.puck = self._create_puck((W / 2 + self.r_uniform(0, W / 3),
                                            H / 2 + 0.8 * self.r_uniform(-H / 2, H / 2)), (0, 0, 0))
             direction = (self.puck.position - (
-                0, H / 2 + .6*self.r_uniform(-GOAL_SIZE / SCALE, GOAL_SIZE / SCALE)))
+                0, H / 2 + .6 * self.r_uniform(-GOAL_SIZE / SCALE, GOAL_SIZE / SCALE)))
             direction = direction / direction.length
             force = -direction * SHOOTFORCEMULTIPLIER * self.puck.mass / self.timeStep
             self.puck.ApplyForceToCenter(force, True)
           # Todo get the scaling right
 
         self.drawlist.extend([self.player1, self.player2, self.puck])
-
 
         obs = self._get_obs()
 
@@ -418,7 +420,7 @@ class HockeyEnv(gym.Env, EzPickle):
             force = -action * FORCEMULTIPLIER
 
         if (is_player_one and player.position[0] > CENTER_X - ZONE) \
-            or (not is_player_one and player.position[0] < CENTER_X + ZONE):  # bounce at the center line
+                or (not is_player_one and player.position[0] < CENTER_X + ZONE):  # bounce at the center line
             force[0] = 0
             if is_player_one:
                 if player.linearVelocity[0] > 0:
@@ -605,7 +607,7 @@ class HockeyEnv(gym.Env, EzPickle):
             if self.player2_has_puck > 1:
                 self._keep_puck(self.player2)
                 self.player2_has_puck -= 1
-                if self.player2_has_puck == 1 or action[player2_idx+3] > 0.5:  # shooting
+                if self.player2_has_puck == 1 or action[player2_idx + 3] > 0.5:  # shooting
                     self._shoot(self.player2)
                     self.player2_has_puck = 0
 
@@ -697,7 +699,7 @@ class BasicOpponent():
             target_pos = [-210 / SCALE, 0]
         target_angle = MAX_ANGLE * np.sin(self.phase)
         shoot = 0.0
-        if self.keep_mode and obs[16]>0 and obs[16]<7:
+        if self.keep_mode and obs[16] > 0 and obs[16] < 7:
             shoot = 1.0
 
         target = np.asarray([target_pos[0], target_pos[1], target_angle])
@@ -736,6 +738,7 @@ class HumanOpponent():
             32: 7,  # space
         }
 
+        # no need for quiet mode hereeee
         print('Human Controls:')
         print(' left:\t\t\tleft arrow key left')
         print(' right:\t\t\tarrow key right')
@@ -756,7 +759,8 @@ class HumanOpponent():
                 self.a = 0
 
     def act(self, obs):
-        print(self.a)
+        if not self.env.quiet:
+            print(self.a)
         return self.env.discrete_to_continous_action(self.a)
 
 
@@ -786,7 +790,7 @@ try:
     register(
         id='Hockey-One-v0',
         entry_point='laserhockey.hockey_env:HockeyEnv_BasicOpponent',
-        kwargs={'mode' : 0, 'weak_opponent': False}
+        kwargs={'mode': 0, 'weak_opponent': False}
     )
 except Exception as e:
     print(e)
