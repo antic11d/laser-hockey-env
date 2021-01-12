@@ -4,7 +4,7 @@ This repository contains two version of a hockey-like game
 
 ## Install
 
-``python3 -m pip install git+https://github.com/martius-lab/laser-hockey-env.git``
+``python3 -m pip install git+https://github.com/antic11d/laser-hockey-env.git``
 
 or add the following line to your Pipfile
 
