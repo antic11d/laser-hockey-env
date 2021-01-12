@@ -414,6 +414,7 @@ class HockeyEnv(gym.Env, EzPickle):
     def _apply_translation_action_with_max_speed(self, player, action, max_speed, is_player_one):
         velocity = np.asarray(player.linearVelocity)
         speed = np.sqrt(np.sum((velocity) ** 2))
+
         if is_player_one:
             force = action * FORCEMULTIPLIER
         else:
@@ -766,8 +767,8 @@ class HumanOpponent():
 
 class HockeyEnv_BasicOpponent(HockeyEnv):
 
-    def __init__(self, mode=HockeyEnv.NORMAL, weak_opponent=False):
-        super().__init__(mode=mode, keep_mode=True)
+    def __init__(self, quiet, mode=HockeyEnv.NORMAL, weak_opponent=False):
+        super().__init__(mode=mode, quiet=quiet, keep_mode=True)
         self.opponent = BasicOpponent(weak=weak_opponent)
         # linear force in (x,y)-direction, torque, and shooting
         self.action_space = spaces.Box(-1, +1, (4,), dtype=np.float32)
