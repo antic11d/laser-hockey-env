@@ -1,6 +1,6 @@
 # laser-hockey-env
 
-This repository contains two version of a hockey-like game
+This repository is a fork from `https://github.com/martius-lab/laser-hockey-env` and contains two version of a hockey-like game.
 
 ## Install
 
@@ -8,7 +8,7 @@ This repository contains two version of a hockey-like game
 
 or add the following line to your Pipfile
 
-``laserhockey = {editable = true, git = "https://git@github.com/martius-lab/laser-hockey-env.git"}``
+``laserhockey = {editable = true, git = "https://github.com/antic11d/laser-hockey-env.git"}``
 
 
 ## HockeyEnv
