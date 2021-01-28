@@ -42,20 +42,21 @@ def dist_positions(p1, p2):
 
 
 class ContactDetector(contactListener):
-    def __init__(self, env):
+    def __init__(self, env, verbose=False):
         contactListener.__init__(self)
         self.env = env
+        self.verbose = verbose
 
     def BeginContact(self, contact):
         if self.env.goal_player_2 == contact.fixtureA.body or self.env.goal_player_2 == contact.fixtureB.body:
             if self.env.puck == contact.fixtureA.body or self.env.puck == contact.fixtureB.body:
-                if not self.env.quiet:
+                if self.verbose:
                     print(f'{Fore.GREEN}Player 1{Style.RESET_ALL}', end="")
                 self.env.done = True
                 self.env.winner = 1
         if self.env.goal_player_1 == contact.fixtureA.body or self.env.goal_player_1 == contact.fixtureB.body:
             if self.env.puck == contact.fixtureA.body or self.env.puck == contact.fixtureB.body:
-                if not self.env.quiet:
+                if self.verbose:
                     print(f'{Fore.RED}Player 2{Style.RESET_ALL}', end="")
                 self.env.done = True
                 self.env.winner = -1
@@ -86,7 +87,7 @@ class HockeyEnv(gym.Env, EzPickle):
     TRAIN_SHOOTING = 1
     TRAIN_DEFENSE = 2
 
-    def __init__(self, keep_mode=True, mode=NORMAL, quiet=False):
+    def __init__(self, keep_mode=True, mode=NORMAL, verbose=False):
         """ mode: is the game mode: NORMAL, TRAIN_SHOOTING, TRAIN_DEFENSE,
         keep_mode: whether the puck gets catched by
         it can be changed later using the reset function
@@ -96,7 +97,6 @@ class HockeyEnv(gym.Env, EzPickle):
         self.viewer = None
         self.mode = mode
         self.keep_mode = keep_mode
-        self.quiet = quiet
         self.player1_has_puck = 0
         self.player2_has_puck = 0
 
@@ -145,6 +145,8 @@ class HockeyEnv(gym.Env, EzPickle):
 
         # see discrete_to_continous_action()
         self.discrete_action_space = spaces.Discrete(7)
+
+        self.verbose = verbose
 
         self.reset(self.one_starts)
 
@@ -339,7 +341,7 @@ class HockeyEnv(gym.Env, EzPickle):
 
     def reset(self, one_starting=None, mode=None):
         self._destroy()
-        self.world.contactListener_keepref = ContactDetector(self)
+        self.world.contactListener_keepref = ContactDetector(self, verbose=self.verbose)
         self.world.contactListener = self.world.contactListener_keepref
         self.done = False
         self.winner = 0
