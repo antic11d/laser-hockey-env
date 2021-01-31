@@ -42,38 +42,38 @@ def dist_positions(p1, p2):
 
 
 class ContactDetector(contactListener):
-    def __init__(self, env, verbose=False):
-        contactListener.__init__(self)
-        self.env = env
-        self.verbose = verbose
+  def __init__(self, env, verbose=False):
+    contactListener.__init__(self)
+    self.env = env
+    self.verbose = verbose
 
-    def BeginContact(self, contact):
-        if self.env.goal_player_2 == contact.fixtureA.body or self.env.goal_player_2 == contact.fixtureB.body:
-            if self.env.puck == contact.fixtureA.body or self.env.puck == contact.fixtureB.body:
-                if self.verbose:
-                    print(f'{Fore.GREEN}Player 1{Style.RESET_ALL}', end="")
-                self.env.done = True
-                self.env.winner = 1
-        if self.env.goal_player_1 == contact.fixtureA.body or self.env.goal_player_1 == contact.fixtureB.body:
-            if self.env.puck == contact.fixtureA.body or self.env.puck == contact.fixtureB.body:
-                if self.verbose:
-                    print(f'{Fore.RED}Player 2{Style.RESET_ALL}', end="")
-                self.env.done = True
-                self.env.winner = -1
-        if (contact.fixtureA.body == self.env.player1 or contact.fixtureB.body == self.env.player1) \
-                and (contact.fixtureA.body == self.env.puck or contact.fixtureB.body == self.env.puck):
-            if self.env.keep_mode and self.env.puck.linearVelocity[0] < 0.1:
-                if self.env.player1_has_puck == 0:
-                    self.env.player1_has_puck = MAX_TIME_KEEP_PUCK
+  def BeginContact(self, contact):
+    if self.env.goal_player_2 == contact.fixtureA.body or self.env.goal_player_2 == contact.fixtureB.body:
+      if self.env.puck == contact.fixtureA.body or self.env.puck == contact.fixtureB.body:
+        if self.verbose:
+          print(f'{Fore.GREEN}Player 1{Style.RESET_ALL}', end="")
+        self.env.done = True
+        self.env.winner = 1
+    if self.env.goal_player_1 == contact.fixtureA.body or self.env.goal_player_1 == contact.fixtureB.body:
+      if self.env.puck == contact.fixtureA.body or self.env.puck == contact.fixtureB.body:
+        if self.verbose:
+          print(f'{Fore.RED}Player 2{Style.RESET_ALL}', end="")
+        self.env.done = True
+        self.env.winner = -1
+    if (contact.fixtureA.body == self.env.player1 or contact.fixtureB.body == self.env.player1) \
+        and (contact.fixtureA.body == self.env.puck or contact.fixtureB.body == self.env.puck):
+      if self.env.keep_mode and self.env.puck.linearVelocity[0] < 0.1:
+        if self.env.player1_has_puck == 0:
+          self.env.player1_has_puck = MAX_TIME_KEEP_PUCK
 
-        if (contact.fixtureA.body == self.env.player2 or contact.fixtureB.body == self.env.player2) \
-                and (contact.fixtureA.body == self.env.puck or contact.fixtureB.body == self.env.puck):
-            if self.env.keep_mode and self.env.puck.linearVelocity[0] > -0.1:
-                if self.env.player2_has_puck == 0:
-                    self.env.player2_has_puck = MAX_TIME_KEEP_PUCK
+    if (contact.fixtureA.body == self.env.player2 or contact.fixtureB.body == self.env.player2) \
+        and (contact.fixtureA.body == self.env.puck or contact.fixtureB.body == self.env.puck):
+      if self.env.keep_mode and self.env.puck.linearVelocity[0] > -0.1:
+        if self.env.player2_has_puck == 0:
+          self.env.player2_has_puck = MAX_TIME_KEEP_PUCK
 
-    def EndContact(self, contact):
-        pass
+  def EndContact(self, contact):
+    pass
 
 
 class HockeyEnv(gym.Env, EzPickle):
