@@ -9,5 +9,5 @@ setup(name='laserhockey',
       license='MIT',
       packages=['laserhockey'],
       python_requires='>=3.6',
-      install_requires=['gym', 'numpy', 'box2d', 'box2d-kengz', 'colorama', 'tabulate'],
+      install_requires=['gym', 'numpy', 'box2d', 'colorama', 'tabulate'],
       zip_safe=False)
